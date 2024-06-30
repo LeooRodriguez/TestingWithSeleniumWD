@@ -1,24 +1,37 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
+import sys
+import os
 import time
+import unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By  
+from pages.login_page import LoginPage
 
-driver = webdriver.Chrome()
 
-try:
-    driver.get('https://www.saucedemo.com/')
-    username = driver.find_element(By.ID, 'user-name')
-    password = driver.find_element(By.ID, 'password')
-    login_button = driver.find_element(By.ID, 'login-button')
-    username.send_keys('standard_user')
-    password.send_keys('secret_sauce')
-    login_button.click()
-    time.sleep(2)
+class TestLogin(unittest.TestCase):
 
-    assert "inventory.html" in driver.current_url, "Login failed"
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+        self.driver.maximize_window()
+        self.login_page = LoginPage(self.driver)
+        time.sleep(3)
 
-    print("Login test passed")
+    def test_successful_login(self):
+        self.login_page.go_to("")
+        time.sleep(3)
+        self.login_page.login('standard_user', 'secret_sauce')
+        time.sleep(3)
+        self.assertIn("inventory.html", self.driver.current_url)
 
-finally:
-    driver.quit()
+    def test_unsuccessful_login(self):
+        self.login_page.go_to("")
+        time.sleep(3)
+        self.login_page.login('invalid_user', 'invalid_password')
+        time.sleep(3)
+        error_message = self.login_page.wait_for_element((By.CSS_SELECTOR, '.error-message-container'))
+        self.assertTrue(error_message.is_displayed())
+
+    def tearDown(self):
+        self.driver.quit()
+
+if __name__ == "__main__":
+    unittest.main()
