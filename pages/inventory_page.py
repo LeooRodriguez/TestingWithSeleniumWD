@@ -11,3 +11,6 @@ class InventoryPage(BasePage):
 
     def get_cart_count(self):
         return self.find_element(*self.cart_badge).text
+    
+    def get_inventory_items(self):
+        return self.driver.find_elements(*self.inventory_items)
